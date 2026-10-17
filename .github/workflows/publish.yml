@@ -1,0 +1,29 @@
+name: Publish public release
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['incoming/**']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: public-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - run: python -m pip install cryptography==50.0.2 httpx==0.28.1
+      - name: Verify and publish all assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/public_release.py
